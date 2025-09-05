@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consulta de CEP</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Consulta de CEP</h1>
+
+    <input type="text" id="cep" placeholder="Digite o CEP" />
+
+    <!-- Substituído o input por select -->
+    <select id="uf">
+      <option value="">Carregando estados...</option>
+    </select>
+
+    <input type="text" id="cidade" placeholder="Digite a Cidade" />
+    <input type="text" id="logradouro" placeholder="Digite o Logradouro" />
+
+    <div class="buttons">
+      <button onclick="buscarCEP()">Pesquisar</button>
+      <button onclick="limparCampos()">Limpar</button>
+      <button onclick="mostrarHistorico()">Ver Histórico</button>
+      <button id="limparHistoricoBtn" onclick="limparHistorico()" style="display:none;">Limpar Histórico</button>
+    </div>
+
+    <div id="mensagem"></div>
+    <div id="resultados"></div>
+    <div id="historico"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
