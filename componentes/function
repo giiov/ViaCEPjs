@@ -1,1 +1,154 @@
+let historicoDados = [];
+
+window.onload = () => {
+  const dadosSalvos = localStorage.getItem('historicoDados');
+  if (dadosSalvos) {
+    historicoDados = JSON.parse(dadosSalvos);
+    
+  }
+};
+
+function buscarCEP() {
+  const cep = document.getElementById('cep').value.trim();
+  const uf = document.getElementById('uf').value.trim();
+  const cidade = document.getElementById('cidade').value.trim();
+  const logradouro = document.getElementById('logradouro').value.trim();
+  const mensagem = document.getElementById('mensagem');
+  const resultados = document.getElementById('resultados');
+
+  mensagem.textContent = 'Carregando...';
+  resultados.innerHTML = '';
+
+  let url = '';
+  if (cep) {
+    url = `https://viacep.com.br/ws/${cep}/json/`;
+  } else if (uf && cidade && logradouro) {
+    url = `https://viacep.com.br/ws/${uf}/${cidade}/${logradouro}/json/`;
+  } else {
+    mensagem.textContent = 'Informe um CEP ou endereço completo.';
+    return;
+  }
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      mensagem.textContent = '';
+      const resultado = Array.isArray(data) ? data : [data];
+
+      if (!resultado || resultado.length === 0 || resultado[0].erro) {
+        mensagem.textContent = 'CEP não encontrado.';
+        return;
+      }
+
+      resultado.forEach(item => {
+        const exibidos = document.createElement('div');
+        exibidos.className = 'result-box';
+        exibidos.innerHTML = `
+          <strong>CEP:</strong> ${item.cep}<br>
+          <strong>Logradouro:</strong> ${item.logradouro}<br>
+          <strong>Bairro:</strong> ${item.bairro}<br>
+          <strong>Cidade:</strong> ${item.localidade}<br>
+          <strong>UF:</strong> ${item.uf}<br>
+          <strong>DDD:</strong> ${item.ddd}
+        `;
+        exibidos.onclick = () => preencherCampos(item);
+        exibidos.style="cursor: pointer";
+        resultados.appendChild(exibidos);
+      });
+
+      if (cep && resultado.length === 1) {
+        preencherCampos(resultado[0]);
+      }
+    })
+    .catch(() => {
+      mensagem.textContent = 'Erro na requisição.';
+    });
+}
+
+function preencherCampos(item) {
+  document.getElementById('cep').value = item.cep || '';
+  document.getElementById('uf').value = item.uf || '';
+  document.getElementById('cidade').value = item.localidade || '';
+  document.getElementById('logradouro').value = item.logradouro || '';
+
+  adicionarAoHistorico(item); 
+}
+
+function adicionarAoHistorico(item) {
+  const seExiste = historicoDados.some(h => h.cep === item.cep);
+  if (!seExiste) {
+    historicoDados.push(item);
+    localStorage.setItem('historicoDados', JSON.stringify(historicoDados));
+  }
+}
+
+function limparCampos() {
+  document.getElementById('cep').value = '';
+  document.getElementById('uf').value = '';
+  document.getElementById('cidade').value = '';
+  document.getElementById('logradouro').value = '';
+  document.getElementById('resultados').innerHTML = '';
+  document.getElementById('mensagem').textContent = '';
+}
+
+function mostrarHistorico() {
+  const historico = document.getElementById('historico');
+  historico.innerHTML = '<h3>Histórico de Pesquisas:</h3>';
+
+  if (historicoDados.length === 0) {
+    historico.innerHTML += '<p>Nenhuma pesquisa registrada ainda.</p>';
+    document.getElementById('limparHistoricoBtn').style.display = 'none';
+    return;
+  }
+
+  historicoDados.forEach(item => {
+    const exibidos = document.createElement('div');
+    exibidos.className = 'result-box';
+    exibidos.innerHTML = `
+      <strong>CEP:</strong> ${item.cep}<br>
+      <strong>Logradouro:</strong> ${item.logradouro}<br>
+      <strong>Bairro:</strong> ${item.bairro}<br>
+      <strong>Cidade:</strong> ${item.localidade}<br>
+      <strong>UF:</strong> ${item.uf}<br>
+      <strong>DDD:</strong> ${item.ddd}
+    `;
+    exibidos.onclick = () => preencherCampos(item);
+    exibidos.style="cursor: pointer";
+    historico.appendChild(exibidos);
+  });
+
+  document.getElementById('limparHistoricoBtn').style.display = 'inline-block';
+}
+
+function limparHistorico() {
+  historicoDados = [];
+  localStorage.removeItem('historicoDados');
+  document.getElementById('historico').innerHTML = '';
+  document.getElementById('limparHistoricoBtn').style.display = 'none';
+}
+
+async function selecionarEstado() {
+  try {
+    const resposta = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
+    const estados = await resposta.json();
+
+    estados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+    const uf = document.getElementById('uf');
+    uf.innerHTML = '<option value="">Selecione o estado</option>';
+
+    estados.forEach(estado => {
+      const opcao = document.createElement('option');
+      opcao.value = estado.sigla;
+      opcao.textContent = estado.nome;
+      uf.appendChild(opcao);
+    });
+  } catch (erro) {
+    console.error('Erro ao carregar estados:', erro);
+    document.getElementById('uf').innerHTML = '<option value="">Erro ao carregar estados</option>';
+  }
+}
+
+window.onload = selecionarEstado;
+
 
