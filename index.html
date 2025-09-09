@@ -6,11 +6,39 @@
   <title>Consulta de CEP</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
+<script src="./componentes/consulta.js"></script>
+<script src="./componentes/historico.js"></script>
+<script src="./componentes/limpar.js"></script>
+<script src="./componentes/selecionarEstado.js"></script>
+<script src="./componentes/preencherCampos.js"></script>
+<script src="./componentes/app.js"></script>
+
 <body>
-  <div class="container">
+
+  <div id="tela1">
+    <button onclick="mostrarTela('tela2')">Buscar por endereço</button>
+
+    <div class="container">
     <h1>Consulta de CEP</h1>
 
     <input type="text" id="cep" placeholder="Digite o CEP" />
+
+    <div class="buttons">
+      <button onclick="buscarCEP()">Pesquisar</button>
+      <button onclick="limparCampos()">Limpar</button>
+      <button onclick="mostrarHistorico()">Ver Histórico</button>
+      <button id="limparHistoricoBtn" onclick="limparHistorico()" style="display:none;">Limpar Histórico</button>
+    </div>
+
+    </div>
+  </div>
+
+  <div id="tela2">
+    <button onclick="mostrarTela('tela1')">Buscar por CEP</button>
+
+    <div class="container">
+    <h1>Consulta de Endereço</h1>
 
     <!-- Substituído o input por select -->
     <select id="uf">
@@ -26,12 +54,12 @@
       <button onclick="mostrarHistorico()">Ver Histórico</button>
       <button id="limparHistoricoBtn" onclick="limparHistorico()" style="display:none;">Limpar Histórico</button>
     </div>
+    </div>
+  </div>
 
     <div id="mensagem"></div>
     <div id="resultados"></div>
     <div id="historico"></div>
-  </div>
 
-  <script src="script.js"></script>
 </body>
 </html>
